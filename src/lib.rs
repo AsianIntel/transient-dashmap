@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 pub struct Item<T> {
     pub object: T,
-    expiration: Instant
+    pub expiration: Instant
 }
 
 #[derive(Clone)]
