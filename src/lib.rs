@@ -1,4 +1,4 @@
-use dashmap::{DashMap, mapref::one::{Ref, RefMut}};
+use dashmap::{DashMap, mapref::{entry::Entry, one::{Ref, RefMut}}};
 use std::hash::Hash;
 use std::time::{Instant, Duration};
 use std::sync::Arc;
@@ -71,5 +71,9 @@ impl<K: Hash + Eq, V> TransientDashMap<K, V> {
 
     pub fn remove(&self, key: &K) -> Option<(K, V)> {
         self.map.remove(key).map(|(k, v)| (k, v.object))
+    }
+
+    pub fn entry(&self, key: K) -> Entry<'_, K, Item<V>> {
+        self.map.entry(key)
     }
 }
