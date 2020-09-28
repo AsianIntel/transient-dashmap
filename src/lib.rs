@@ -1,7 +1,9 @@
-use dashmap::{DashMap, mapref::{entry::Entry, one::{Ref, RefMut}}};
+use dashmap::{DashMap, mapref::one::{Ref, RefMut}};
 use std::hash::Hash;
 use std::time::{Instant, Duration};
 use std::sync::Arc;
+
+pub use dashmap::mapref::entry::*;
 
 pub struct Item<T> {
     pub object: T,
@@ -46,27 +48,27 @@ impl<K: Hash + Eq, V> TransientDashMap<K, V> {
     pub fn get(&self, key: &K) -> Option<Ref<'_, K, Item<V>>> {
         match self.map.get(key) {
             Some(k) => {
-                if k.is_expired() {
-                    self.map.remove(key);
-                    return None
+                if !k.is_expired() {
+                    return Some(k)
                 }
-                Some(k)
             },
-            None => None
+            None => return None
         }
+        self.map.remove(key);
+        None
     }
 
     pub fn get_mut(&self, key: &K) -> Option<RefMut<'_, K, Item<V>>> {
         match self.map.get_mut(key) {
             Some(k) => {
-                if k.is_expired() {
-                    self.map.remove(key);
-                    return None
+                if !k.is_expired() {
+                    return Some(k)
                 }
-                Some(k)
             },
-            None => None
+            None => return None
         }
+        self.map.remove(key);
+        None
     }
 
     pub fn remove(&self, key: &K) -> Option<(K, V)> {
