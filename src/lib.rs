@@ -39,6 +39,10 @@ impl<K: Hash + Eq, V> TransientDashMap<K, V> {
         self.map.insert(key, Item::new(value, Instant::now() + self.duration)).map(|v| v.object)
     }
 
+    pub fn insert_with_expiration(&self, key: K, value: V, expiration: Instant) -> Option<V> {
+        self.map.insert(key, Item::new(value, expiration)).map(|v| v.object)
+    }
+
     pub fn get(&self, key: &K) -> Option<Ref<'_, K, Item<V>>> {
         match self.map.get(key) {
             Some(k) => {
@@ -63,5 +67,9 @@ impl<K: Hash + Eq, V> TransientDashMap<K, V> {
             },
             None => None
         }
+    }
+
+    pub fn remove(&self, key: &K) -> Option<(K, V)> {
+        self.map.remove(key).map(|(k, v)| (k, v.object))
     }
 }
