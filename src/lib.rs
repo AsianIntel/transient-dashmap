@@ -1,3 +1,5 @@
+#![deny(clippy::all, clippy::pedantic)]
+
 use dashmap::{
     mapref::one::{Ref, RefMut},
     DashMap,
@@ -28,9 +30,14 @@ impl<T> Data<T> {
     pub fn is_expired(&self) -> bool {
         Instant::now() > self.expiration
     }
+
+    pub fn expiration(&self) -> Instant {
+        self.expiration
+    }
 }
 
 impl<K: Hash + Eq + Clone, V> TransientDashMap<K, V> {
+    #[must_use]
     pub fn new(duration: Duration) -> Self {
         TransientDashMap {
             map: DashMap::new(),
@@ -84,7 +91,7 @@ impl<K: Hash + Eq + Clone, V> TransientDashMap<K, V> {
     pub fn purge(&self) {
         let items = self.map.iter().map(|r| r.key().clone());
         for item in items {
-            let _ = self.map.get(&item);
+            let _data = self.map.get(&item);
         }
     }
 }
